@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+weapon_id = "machine_gun"
+display_name = "Machine Gun++"
+level = 3
+fire_rate = 16.0
+bullet_speed = 320.0
+damage = 2
+bullets_per_shot = 1
+spread_angle_degrees = 1.0
+muzzle_color = Color(1, 0.2, 0.2, 1)

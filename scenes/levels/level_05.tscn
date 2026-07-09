@@ -1,0 +1,193 @@
+[gd_scene load_steps=26 format=3]
+
+[ext_resource type="Script" path="res://scenes/levels/level_05.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2"]
+[ext_resource type="Script" path="res://scenes/components/bullet_pool.gd" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/bullet.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/enemy_bullet.tscn" id="5"]
+[ext_resource type="Script" path="res://scenes/components/terrain_visual.gd" id="6"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tiles/dirt.png" id="7"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tiles/water.png" id="8"]
+[ext_resource type="Script" path="res://scenes/hazards/water_zone.gd" id="9"]
+[ext_resource type="Script" path="res://scenes/hazards/checkpoint.gd" id="10"]
+[ext_resource type="Script" path="res://scenes/hazards/boss_trigger.gd" id="11"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/shark.tscn" id="12"]
+[ext_resource type="PackedScene" path="res://scenes/spawners/enemy_spawner.tscn" id="13"]
+[ext_resource type="Resource" path="res://resources/waves/wave_05.tres" id="14"]
+[ext_resource type="PackedScene" path="res://scenes/bosses/boss_shark.tscn" id="15"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="16"]
+[ext_resource type="Texture2D" path="res://assets/sprites/generated/sky_gradient.png" id="17"]
+[ext_resource type="Texture2D" path="res://assets/sprites/generated/hills_silhouette.png" id="18"]
+[ext_resource type="PackedScene" path="res://scenes/pickups/weapon_pickup.tscn" id="19"]
+[ext_resource type="PackedScene" path="res://scenes/pickups/flashbang_pickup.tscn" id="20"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
+size = Vector2(32, 300)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
+size = Vector2(1400, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_reef"]
+size = Vector2(60, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_water"]
+size = Vector2(1400, 184)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_checkpoint"]
+size = Vector2(16, 40)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_boss_trigger"]
+size = Vector2(200, 60)
+
+[node name="Level05" type="Node2D"]
+script = ExtResource("1")
+camera_limit_left = 0.0
+camera_limit_right = 1400.0
+camera_limit_top = -100.0
+camera_limit_bottom = 300.0
+
+[node name="Background" type="ParallaxBackground" parent="."]
+
+[node name="SkyLayer" type="ParallaxLayer" parent="Background"]
+motion_scale = Vector2(0.1, 0.05)
+motion_mirroring = Vector2(480, 0)
+
+[node name="Sky" type="Sprite2D" parent="Background/SkyLayer"]
+texture = ExtResource("17")
+centered = false
+
+[node name="HillsLayer" type="ParallaxLayer" parent="Background"]
+motion_scale = Vector2(0.35, 0.1)
+motion_mirroring = Vector2(480, 0)
+
+[node name="Hills" type="Sprite2D" parent="Background/HillsLayer"]
+texture = ExtResource("18")
+centered = false
+position = Vector2(0, 150)
+
+[node name="TerrainVisual" type="Node2D" parent="."]
+script = ExtResource("6")
+grass_texture = ExtResource("7")
+dirt_texture = ExtResource("7")
+water_texture = ExtResource("8")
+water_depth = 12
+
+[node name="Floor" type="StaticBody2D" parent="."]
+position = Vector2(700, 250)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor"]
+shape = SubResource("RectangleShape2D_floor")
+
+[node name="Reef1" type="StaticBody2D" parent="."]
+position = Vector2(330, 186)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Reef1"]
+shape = SubResource("RectangleShape2D_reef")
+
+[node name="Reef2" type="StaticBody2D" parent="."]
+position = Vector2(730, 156)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Reef2"]
+shape = SubResource("RectangleShape2D_reef")
+
+[node name="Reef3" type="StaticBody2D" parent="."]
+position = Vector2(1080, 196)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Reef3"]
+shape = SubResource("RectangleShape2D_reef")
+
+[node name="LeftWall" type="StaticBody2D" parent="."]
+position = Vector2(0, 120)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall"]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="RightWall" type="StaticBody2D" parent="."]
+position = Vector2(1400, 120)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall"]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="WaterZone" type="Area2D" parent="."]
+position = Vector2(700, 142)
+collision_layer = 64
+collision_mask = 2
+script = ExtResource("9")
+speed_multiplier = 0.7
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WaterZone"]
+shape = SubResource("RectangleShape2D_water")
+
+[node name="Checkpoint" type="Area2D" parent="."]
+position = Vector2(700, 220)
+collision_layer = 64
+collision_mask = 2
+script = ExtResource("10")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Checkpoint"]
+shape = SubResource("RectangleShape2D_checkpoint")
+
+[node name="BossTrigger" type="Area2D" parent="."]
+position = Vector2(1300, 220)
+collision_layer = 64
+collision_mask = 2
+script = ExtResource("11")
+boss_path = NodePath("../BossShark")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BossTrigger"]
+shape = SubResource("RectangleShape2D_boss_trigger")
+
+[node name="Player" parent="." instance=ExtResource("2")]
+position = Vector2(40, 224.9252)
+
+[node name="Projectiles" type="Node2D" parent="."]
+script = ExtResource("3")
+bullet_scene = ExtResource("4")
+
+[node name="EnemyProjectiles" type="Node2D" parent="."]
+script = ExtResource("3")
+bullet_scene = ExtResource("5")
+group_name = "enemy_bullet_pool"
+
+[node name="Shark1" parent="." instance=ExtResource("12")]
+position = Vector2(250, 140)
+
+[node name="Shark2" parent="." instance=ExtResource("12")]
+position = Vector2(600, 190)
+
+[node name="Shark3" parent="." instance=ExtResource("12")]
+position = Vector2(950, 120)
+
+[node name="EnemySpawner1" parent="." instance=ExtResource("13")]
+position = Vector2(500, 150)
+wave = ExtResource("14")
+
+[node name="EnemySpawner2" parent="." instance=ExtResource("13")]
+position = Vector2(1000, 170)
+wave = ExtResource("14")
+
+[node name="FlashbangPickup" parent="." instance=ExtResource("20")]
+position = Vector2(150, 224.9252)
+
+[node name="MachineGunPickup" parent="." instance=ExtResource("19")]
+position = Vector2(850, 200)
+weapon_id = "machine_gun"
+
+[node name="BossShark" parent="." instance=ExtResource("15")]
+position = Vector2(1330, 224.9252)
+arena_left = 1220.0
+arena_right = 1380.0
+
+[node name="HUD" parent="." instance=ExtResource("16")]

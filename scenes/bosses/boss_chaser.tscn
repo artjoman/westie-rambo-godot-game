@@ -1,0 +1,48 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scenes/bosses/boss_chaser.gd" id="1"]
+[ext_resource type="Script" path="res://scenes/components/health_component.gd" id="2"]
+[ext_resource type="Script" path="res://scenes/components/hurtbox.gd" id="3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/generated/boss_chaser.png" id="4"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_chaser"]
+size = Vector2(20, 32)
+
+[node name="BossChaser" type="CharacterBody2D"]
+collision_layer = 0
+collision_mask = 0
+script = ExtResource("1")
+boss_max_health = 26
+score_value = 2500
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -16)
+shape = SubResource("RectangleShape2D_chaser")
+
+[node name="Visual" type="Sprite2D" parent="."]
+position = Vector2(0, -16)
+scale = Vector2(1.3, 1.3)
+texture = ExtResource("4")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("2")
+
+[node name="Hurtbox" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("3")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+position = Vector2(0, -16)
+shape = SubResource("RectangleShape2D_chaser")
+
+[node name="Muzzle" type="Marker2D" parent="."]
+position = Vector2(0, -20)
+
+[node name="FireTimer" type="Timer" parent="."]
+wait_time = 1.0
+autostart = true
+
+[node name="ChargeTimer" type="Timer" parent="."]
+wait_time = 2.5
+autostart = true

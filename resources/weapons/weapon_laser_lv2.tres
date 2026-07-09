@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+weapon_id = "laser"
+display_name = "Laser+"
+level = 2
+damage = 2
+is_beam = true
+beam_range = 200.0
+beam_tick_interval = 0.12
+beam_color = Color(0.3, 0.85, 1, 1)
+muzzle_color = Color(0.3, 0.85, 1, 1)

@@ -1,0 +1,119 @@
+[gd_scene load_steps=15 format=3]
+
+[ext_resource type="Script" path="res://scenes/levels/test_level.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2"]
+[ext_resource type="Script" path="res://scenes/components/bullet_pool.gd" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/bullet.tscn" id="4"]
+[ext_resource type="Script" path="res://scenes/components/terrain_visual.gd" id="5"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tiles/grass_top.png" id="6"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tiles/dirt.png" id="7"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tiles/water.png" id="8"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tiles/hole.png" id="9"]
+[ext_resource type="Script" path="res://scenes/hazards/death_pit.gd" id="10"]
+[ext_resource type="Script" path="res://scenes/hazards/slow_zone.gd" id="11"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/enemy_bullet.tscn" id="12"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/turret.tscn" id="13"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/soldier.tscn" id="14"]
+[ext_resource type="PackedScene" path="res://scenes/spawners/enemy_spawner.tscn" id="15"]
+[ext_resource type="Resource" path="res://resources/waves/wave_01.tres" id="16"]
+[ext_resource type="PackedScene" path="res://scenes/pickups/weapon_pickup.tscn" id="17"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="18"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_floor_left"]
+size = Vector2(176, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_floor_right"]
+size = Vector2(240, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
+size = Vector2(32, 200)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_death_pit"]
+size = Vector2(64, 60)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_slow_zone"]
+size = Vector2(80, 40)
+
+[node name="TestLevel" type="Node2D"]
+script = ExtResource("1")
+
+[node name="TerrainVisual" type="Node2D" parent="."]
+script = ExtResource("5")
+grass_texture = ExtResource("6")
+dirt_texture = ExtResource("7")
+water_texture = ExtResource("8")
+hole_texture = ExtResource("9")
+
+[node name="FloorLeft" type="StaticBody2D" parent="."]
+position = Vector2(88, 250)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FloorLeft"]
+shape = SubResource("RectangleShape2D_floor_left")
+
+[node name="FloorRight" type="StaticBody2D" parent="."]
+position = Vector2(360, 250)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FloorRight"]
+shape = SubResource("RectangleShape2D_floor_right")
+
+[node name="LeftWall" type="StaticBody2D" parent="."]
+position = Vector2(0, 130)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall"]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="DeathPit" type="Area2D" parent="."]
+position = Vector2(208, 264)
+collision_layer = 64
+collision_mask = 2
+script = ExtResource("10")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DeathPit"]
+shape = SubResource("RectangleShape2D_death_pit")
+
+[node name="SlowZone" type="Area2D" parent="."]
+position = Vector2(360, 225)
+collision_layer = 64
+collision_mask = 2
+script = ExtResource("11")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SlowZone"]
+shape = SubResource("RectangleShape2D_slow_zone")
+
+[node name="Player" parent="." instance=ExtResource("2")]
+position = Vector2(88, 216)
+
+[node name="Projectiles" type="Node2D" parent="."]
+script = ExtResource("3")
+bullet_scene = ExtResource("4")
+
+[node name="EnemyProjectiles" type="Node2D" parent="."]
+script = ExtResource("3")
+bullet_scene = ExtResource("12")
+group_name = "enemy_bullet_pool"
+
+[node name="Turret" parent="." instance=ExtResource("13")]
+position = Vector2(140, 234)
+
+[node name="Soldier" parent="." instance=ExtResource("14")]
+position = Vector2(420, 224.9252)
+
+[node name="EnemySpawner" parent="." instance=ExtResource("15")]
+position = Vector2(460, 224.9252)
+wave = ExtResource("16")
+
+[node name="SpreadPickup" parent="." instance=ExtResource("17")]
+position = Vector2(110, 224.9252)
+weapon_id = "spread"
+
+[node name="LaserPickup" parent="." instance=ExtResource("17")]
+position = Vector2(260, 224.9252)
+weapon_id = "laser"
+
+[node name="HUD" parent="." instance=ExtResource("18")]

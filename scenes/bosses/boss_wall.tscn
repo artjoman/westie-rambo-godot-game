@@ -1,0 +1,50 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scenes/bosses/boss_wall.gd" id="1"]
+[ext_resource type="Script" path="res://scenes/components/health_component.gd" id="2"]
+[ext_resource type="Script" path="res://scenes/components/hurtbox.gd" id="3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/generated/boss_wall.png" id="4"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
+size = Vector2(28, 48)
+
+[node name="BossWall" type="CharacterBody2D"]
+collision_layer = 0
+collision_mask = 0
+script = ExtResource("1")
+boss_max_health = 24
+score_value = 2000
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -24)
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="Visual" type="Sprite2D" parent="."]
+position = Vector2(0, -24)
+scale = Vector2(1.3, 1.3)
+texture = ExtResource("4")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("2")
+
+[node name="Hurtbox" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("3")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+position = Vector2(0, -24)
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="MuzzleTop" type="Marker2D" parent="."]
+position = Vector2(-16, -38)
+
+[node name="MuzzleMid" type="Marker2D" parent="."]
+position = Vector2(-16, -24)
+
+[node name="MuzzleBottom" type="Marker2D" parent="."]
+position = Vector2(-16, -10)
+
+[node name="FireTimer" type="Timer" parent="."]
+wait_time = 1.4
+autostart = true

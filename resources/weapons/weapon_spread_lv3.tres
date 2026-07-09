@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/weapons/weapon_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+weapon_id = "spread"
+display_name = "Spread Gun++"
+level = 3
+fire_rate = 5.0
+bullet_speed = 260.0
+damage = 2
+bullets_per_shot = 7
+spread_angle_degrees = 50.0
+muzzle_color = Color(1, 0.5, 0.1, 1)

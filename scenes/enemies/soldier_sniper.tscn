@@ -1,0 +1,50 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scenes/enemies/soldier.gd" id="1"]
+[ext_resource type="Script" path="res://scenes/components/health_component.gd" id="2"]
+[ext_resource type="Script" path="res://scenes/components/hurtbox.gd" id="3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/generated/ninja_cat_sniper.png" id="4"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_soldier"]
+size = Vector2(10, 18)
+
+[node name="SoldierSniper" type="CharacterBody2D"]
+collision_layer = 0
+collision_mask = 1
+script = ExtResource("1")
+patrol_speed = 40.0
+aggro_range = 200.0
+shoot_range = 180.0
+bullet_speed = 220.0
+damage = 1
+score_value = 200
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_soldier")
+
+[node name="Visual" type="Node2D" parent="."]
+
+[node name="Body" type="Sprite2D" parent="Visual"]
+position = Vector2(0, 0)
+texture = ExtResource("4")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("2")
+max_health = 1
+
+[node name="Hurtbox" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("3")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+shape = SubResource("RectangleShape2D_soldier")
+
+[node name="Muzzle" type="Marker2D" parent="."]
+position = Vector2(8, -4)
+
+[node name="FireTimer" type="Timer" parent="."]
+wait_time = 1.8
+autostart = true
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]

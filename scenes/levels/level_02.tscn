@@ -1,0 +1,366 @@
+[gd_scene load_steps=32 format=3]
+
+[ext_resource type="Script" path="res://scenes/levels/level_02.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2"]
+[ext_resource type="Script" path="res://scenes/components/bullet_pool.gd" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/bullet.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/enemy_bullet.tscn" id="5"]
+[ext_resource type="Script" path="res://scenes/components/terrain_visual.gd" id="6"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tiles/grass_top.png" id="7"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tiles/dirt.png" id="8"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tiles/water.png" id="9"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tiles/hole.png" id="10"]
+[ext_resource type="Script" path="res://scenes/hazards/death_pit.gd" id="11"]
+[ext_resource type="Script" path="res://scenes/hazards/water_zone.gd" id="12"]
+[ext_resource type="Script" path="res://scenes/hazards/checkpoint.gd" id="13"]
+[ext_resource type="Script" path="res://scenes/hazards/boss_trigger.gd" id="14"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/turret.tscn" id="15"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/soldier.tscn" id="16"]
+[ext_resource type="PackedScene" path="res://scenes/spawners/enemy_spawner.tscn" id="17"]
+[ext_resource type="Resource" path="res://resources/waves/wave_01.tres" id="18"]
+[ext_resource type="PackedScene" path="res://scenes/pickups/weapon_pickup.tscn" id="19"]
+[ext_resource type="PackedScene" path="res://scenes/bosses/boss_splitter.tscn" id="20"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="21"]
+[ext_resource type="Texture2D" path="res://assets/sprites/generated/sky_gradient.png" id="22"]
+[ext_resource type="Texture2D" path="res://assets/sprites/generated/hills_silhouette.png" id="23"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/poop_bullet.tscn" id="24"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/bat.tscn" id="25"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/crow.tscn" id="26"]
+[ext_resource type="PackedScene" path="res://scenes/pickups/shield_pickup.tscn" id="27"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground_a"]
+size = Vector2(250, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground_b"]
+size = Vector2(200, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground_c"]
+size = Vector2(250, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground_d"]
+size = Vector2(250, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground_e"]
+size = Vector2(200, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
+size = Vector2(32, 200)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pit1"]
+size = Vector2(50, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pit2"]
+size = Vector2(50, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_water1"]
+size = Vector2(100, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pool_floor1"]
+size = Vector2(100, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_water2"]
+size = Vector2(50, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pool_floor2"]
+size = Vector2(50, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_checkpoint"]
+size = Vector2(16, 40)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_boss_trigger"]
+size = Vector2(180, 60)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gauntlet"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_climb_step"]
+size = Vector2(40, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_new_pit"]
+size = Vector2(32, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wide_descent"]
+size = Vector2(80, 32)
+
+[node name="Level02" type="Node2D"]
+script = ExtResource("1")
+camera_limit_right = 1760.0
+
+[node name="Background" type="ParallaxBackground" parent="."]
+
+[node name="SkyLayer" type="ParallaxLayer" parent="Background"]
+motion_scale = Vector2(0.1, 0.05)
+motion_mirroring = Vector2(480, 0)
+
+[node name="Sky" type="Sprite2D" parent="Background/SkyLayer"]
+texture = ExtResource("22")
+centered = false
+
+[node name="HillsLayer" type="ParallaxLayer" parent="Background"]
+motion_scale = Vector2(0.35, 0.1)
+motion_mirroring = Vector2(480, 0)
+
+[node name="Hills" type="Sprite2D" parent="Background/HillsLayer"]
+texture = ExtResource("23")
+centered = false
+position = Vector2(0, 150)
+
+[node name="TerrainVisual" type="Node2D" parent="."]
+script = ExtResource("6")
+grass_texture = ExtResource("7")
+dirt_texture = ExtResource("8")
+water_texture = ExtResource("9")
+hole_texture = ExtResource("10")
+
+[node name="GroundA" type="StaticBody2D" parent="."]
+position = Vector2(125, 250)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GroundA"]
+shape = SubResource("RectangleShape2D_ground_a")
+
+[node name="GroundB" type="StaticBody2D" parent="."]
+position = Vector2(400, 250)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GroundB"]
+shape = SubResource("RectangleShape2D_ground_b")
+
+[node name="GroundC" type="StaticBody2D" parent="."]
+position = Vector2(725, 250)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GroundC"]
+shape = SubResource("RectangleShape2D_ground_c")
+
+[node name="GroundD" type="StaticBody2D" parent="."]
+position = Vector2(1025, 250)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GroundD"]
+shape = SubResource("RectangleShape2D_ground_d")
+
+[node name="GroundE" type="StaticBody2D" parent="."]
+position = Vector2(1660, 250)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GroundE"]
+shape = SubResource("RectangleShape2D_ground_e")
+
+[node name="GauntletPlatform1" type="StaticBody2D" parent="."]
+position = Vector2(1216, 250)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GauntletPlatform1"]
+shape = SubResource("RectangleShape2D_gauntlet")
+
+[node name="GauntletPlatform2" type="StaticBody2D" parent="."]
+position = Vector2(1280, 250)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GauntletPlatform2"]
+shape = SubResource("RectangleShape2D_gauntlet")
+
+[node name="GauntletPlatform3" type="StaticBody2D" parent="."]
+position = Vector2(1344, 250)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GauntletPlatform3"]
+shape = SubResource("RectangleShape2D_gauntlet")
+
+[node name="ClimbStep0" type="StaticBody2D" parent="."]
+position = Vector2(1380, 250)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ClimbStep0"]
+shape = SubResource("RectangleShape2D_climb_step")
+
+[node name="ClimbStep1" type="StaticBody2D" parent="."]
+position = Vector2(1420, 226)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ClimbStep1"]
+shape = SubResource("RectangleShape2D_climb_step")
+
+[node name="ClimbStep2" type="StaticBody2D" parent="."]
+position = Vector2(1460, 202)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ClimbStep2"]
+shape = SubResource("RectangleShape2D_climb_step")
+
+[node name="ClimbStep3" type="StaticBody2D" parent="."]
+position = Vector2(1520, 226)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ClimbStep3"]
+shape = SubResource("RectangleShape2D_wide_descent")
+
+[node name="LeftWall" type="StaticBody2D" parent="."]
+position = Vector2(0, 130)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall"]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="RightWall" type="StaticBody2D" parent="."]
+position = Vector2(1760, 130)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall"]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="DeathPit1" type="Area2D" parent="."]
+position = Vector2(275, 270)
+collision_layer = 64
+collision_mask = 2
+script = ExtResource("11")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DeathPit1"]
+shape = SubResource("RectangleShape2D_pit1")
+
+[node name="DeathPit2" type="Area2D" parent="."]
+position = Vector2(875, 270)
+collision_layer = 64
+collision_mask = 2
+script = ExtResource("11")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DeathPit2"]
+shape = SubResource("RectangleShape2D_pit2")
+
+[node name="DeathPit3" type="Area2D" parent="."]
+position = Vector2(1248, 270)
+collision_layer = 64
+collision_mask = 2
+script = ExtResource("11")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DeathPit3"]
+shape = SubResource("RectangleShape2D_new_pit")
+
+[node name="DeathPit4" type="Area2D" parent="."]
+position = Vector2(1312, 270)
+collision_layer = 64
+collision_mask = 2
+script = ExtResource("11")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DeathPit4"]
+shape = SubResource("RectangleShape2D_new_pit")
+
+[node name="PoolFloor1" type="StaticBody2D" parent="."]
+position = Vector2(550, 282)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PoolFloor1"]
+shape = SubResource("RectangleShape2D_pool_floor1")
+
+[node name="WaterZone1" type="Area2D" parent="."]
+position = Vector2(550, 258)
+collision_layer = 64
+collision_mask = 2
+script = ExtResource("12")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WaterZone1"]
+shape = SubResource("RectangleShape2D_water1")
+
+[node name="PoolFloor2" type="StaticBody2D" parent="."]
+position = Vector2(1175, 282)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PoolFloor2"]
+shape = SubResource("RectangleShape2D_pool_floor2")
+
+[node name="WaterZone2" type="Area2D" parent="."]
+position = Vector2(1175, 258)
+collision_layer = 64
+collision_mask = 2
+script = ExtResource("12")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WaterZone2"]
+shape = SubResource("RectangleShape2D_water2")
+
+[node name="Checkpoint" type="Area2D" parent="."]
+position = Vector2(950, 220)
+collision_layer = 64
+collision_mask = 2
+script = ExtResource("13")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Checkpoint"]
+shape = SubResource("RectangleShape2D_checkpoint")
+
+[node name="BossTrigger" type="Area2D" parent="."]
+position = Vector2(1630, 220)
+collision_layer = 64
+collision_mask = 2
+script = ExtResource("14")
+boss_path = NodePath("../BossSplitter")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BossTrigger"]
+shape = SubResource("RectangleShape2D_boss_trigger")
+
+[node name="Player" parent="." instance=ExtResource("2")]
+position = Vector2(40, 216)
+
+[node name="Projectiles" type="Node2D" parent="."]
+script = ExtResource("3")
+bullet_scene = ExtResource("4")
+
+[node name="EnemyProjectiles" type="Node2D" parent="."]
+script = ExtResource("3")
+bullet_scene = ExtResource("5")
+group_name = "enemy_bullet_pool"
+
+[node name="PoopProjectiles" type="Node2D" parent="."]
+script = ExtResource("3")
+bullet_scene = ExtResource("24")
+group_name = "poop_bullet_pool"
+
+[node name="Turret" parent="." instance=ExtResource("15")]
+position = Vector2(380, 234)
+
+[node name="Soldier1" parent="." instance=ExtResource("16")]
+position = Vector2(650, 224.9252)
+
+[node name="Soldier2" parent="." instance=ExtResource("16")]
+position = Vector2(750, 224.9252)
+
+[node name="Bat1" parent="." instance=ExtResource("25")]
+position = Vector2(400, 160)
+
+[node name="Crow1" parent="." instance=ExtResource("26")]
+position = Vector2(900, 150)
+
+[node name="EnemySpawner" parent="." instance=ExtResource("17")]
+position = Vector2(800, 224.9252)
+wave = ExtResource("18")
+
+[node name="SpreadPickup" parent="." instance=ExtResource("19")]
+position = Vector2(130, 224.9252)
+weapon_id = "spread"
+
+[node name="ShieldPickup" parent="." instance=ExtResource("27")]
+position = Vector2(210, 224.9252)
+
+[node name="LaserPickup" parent="." instance=ExtResource("19")]
+position = Vector2(950, 224.9252)
+weapon_id = "laser"
+
+[node name="BossSplitter" parent="." instance=ExtResource("20")]
+position = Vector2(1710, 224.9252)
+
+[node name="HUD" parent="." instance=ExtResource("21")]
