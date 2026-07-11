@@ -21,6 +21,9 @@ const MAX_COMBO_MULTIPLIER := 5
 var score := 0
 var lives := STARTING_LIVES
 var current_level_index := 0
+## Cheat-code toggle (see autoload/cheat_manager.gd) - when true, lose_life()
+## is a no-op, so the player can never die or run out of lives.
+var infinite_lives := false
 
 var _combo_kills := 0
 var _combo_multiplier := 1
@@ -54,6 +57,8 @@ func add_score(amount: int) -> void:
 
 
 func lose_life() -> void:
+	if infinite_lives:
+		return
 	lives = max(lives - 1, 0)
 	lives_changed.emit(lives)
 	if lives <= 0:

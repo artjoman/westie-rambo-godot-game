@@ -27,6 +27,7 @@
 [ext_resource type="PackedScene" path="res://scenes/enemies/bat.tscn" id="25"]
 [ext_resource type="PackedScene" path="res://scenes/enemies/crow.tscn" id="26"]
 [ext_resource type="PackedScene" path="res://scenes/pickups/flashbang_pickup.tscn" id="27"]
+[ext_resource type="PackedScene" path="res://scenes/pickups/shield_pickup.tscn" id="28"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ground_a"]
 size = Vector2(200, 32)
@@ -362,6 +363,9 @@ weapon_id = "machine_gun"
 [node name="LaserPickup" parent="." instance=ExtResource("19")]
 position = Vector2(1150, 224.9252)
 weapon_id = "laser"
+
+[node name="ShieldPickup" parent="." instance=ExtResource("28")]
+position = Vector2(1445, 224.9252)
 
 [node name="BossChaser" parent="." instance=ExtResource("20")]
 position = Vector2(1760, 224.9252)

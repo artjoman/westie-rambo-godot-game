@@ -35,3 +35,7 @@ user request
 ```
 
 For small, single-discipline asks (a pure code fix, a single new sprite, a quick verification pass), it's fine to invoke `developer`, `designer`, or `qa-tester` directly instead of going through `team-lead` — the orchestration layer exists for when a request actually spans multiple disciplines or needs a plan, not as mandatory overhead for everything.
+
+## Release workflow
+
+After every successful build/release — an `--export-debug` or `--export-release` run that completes without errors, and (when a device is available) installs and launches cleanly — commit the working tree and push to `origin/main`. This is standing authorization to push after a verified successful build; no need to ask each time. Write a real commit message describing what changed, not a generic "build" message. If the build fails or verification turns up a crash/regression, fix it first — don't commit a known-broken build.

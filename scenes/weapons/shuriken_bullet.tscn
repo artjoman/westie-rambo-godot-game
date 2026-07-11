@@ -16,6 +16,7 @@ impact_tint = Color(0.75, 0.78, 0.8, 1)
 shape = SubResource("RectangleShape2D_bullet")
 
 [node name="Sprite" type="Sprite2D" parent="."]
+scale = Vector2(2, 2)
 texture = ExtResource("2")
 
 [node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]

@@ -15,6 +15,7 @@ extends CanvasLayer
 const COMBO_COLOR := Color(1, 0.85, 0.2)
 const SUPER_COLOR := Color(1, 0.35, 0.1)
 const PICKUP_COLOR := Color(0.3, 0.9, 1.0)
+const ACHIEVEMENT_COLOR := Color(1.0, 0.84, 0.0)
 
 var _player: Node = null
 var _last_combo_multiplier := 1
@@ -27,6 +28,7 @@ func _ready() -> void:
 	GameState.lives_changed.connect(_on_lives_changed)
 	GameState.combo_changed.connect(_on_combo_changed)
 	GameState.weapon_changed.connect(_on_weapon_changed)
+	AchievementManager.achievement_unlocked.connect(_on_achievement_unlocked)
 
 	_on_score_changed(GameState.score)
 	_on_lives_changed(GameState.lives)
@@ -93,6 +95,10 @@ func _on_weapon_changed(weapon_id: String, level: int) -> void:
 
 func _sync_weapon_label(weapon_id: String, level: int) -> void:
 	weapon_label.text = "WEAPON: %s Lv%d" % [weapon_id.capitalize(), level]
+
+
+func _on_achievement_unlocked(id: String) -> void:
+	show_callout("ACHIEVEMENT: " + AchievementManager.get_title(id), ACHIEVEMENT_COLOR)
 
 
 func show_boss_health(current: int, max_health: int) -> void:

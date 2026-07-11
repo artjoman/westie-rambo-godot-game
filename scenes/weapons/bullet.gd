@@ -4,8 +4,12 @@ extends Area2D
 # handles the common case cheaply, but its signals depend on the rendering
 # server's culling and aren't guaranteed to fire in every context (headless
 # runs, minimized windows) — without this, a missed signal would leak a
-# pooled bullet forever.
-const MAX_LIFETIME := 2.5
+# pooled bullet forever. Exported (not a shared const) so an individual
+# bullet scene can cap its own travel distance/range independent of the
+# others — e.g. poop_bullet.tscn uses a much shorter value so it fades out
+# well before reaching the bottom of the level instead of falling through
+# empty space indefinitely (it has no collision with the world layer).
+@export var max_lifetime: float = 2.5
 
 @export var impact_tint: Color = Color(1, 1, 1)
 
@@ -30,7 +34,7 @@ func _physics_process(delta: float) -> void:
 		return
 	position += direction * speed * delta
 	_lifetime += delta
-	if _lifetime > MAX_LIFETIME:
+	if _lifetime > max_lifetime:
 		deactivate()
 
 

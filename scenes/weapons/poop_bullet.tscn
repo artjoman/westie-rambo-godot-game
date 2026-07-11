@@ -11,11 +11,13 @@ collision_layer = 16
 collision_mask = 128
 script = ExtResource("1")
 impact_tint = Color(0.4, 0.28, 0.12, 1)
+max_lifetime = 0.5
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_poop")
 
 [node name="Sprite" type="Sprite2D" parent="."]
+scale = Vector2(2, 2)
 texture = ExtResource("2")
 
 [node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]

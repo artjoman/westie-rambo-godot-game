@@ -4,7 +4,14 @@ extends Node
 ## a sound at a time, so overlapping gunfire/hits needs several player nodes
 ## to round-robin across.
 
-const POOL_SIZE := 8
+## Kept small: on the Android OpenSL driver, more concurrent voices means
+## more real-time mixing work per audio callback, and this project has hit
+## a native crash (SIGSEGV in the AudioTrack thread, deep in Godot's own
+## mixer) on real hardware during long play sessions. Fewer simultaneous
+## voices reduces that load; it doesn't fix the underlying engine bug
+## (unpatched upstream: godotengine/godot#121195) but lowers how much
+## work the audio thread does per callback.
+const POOL_SIZE := 4
 
 const SFX_SHOOT := preload("res://assets/audio/sfx/sfx_shoot.tres")
 const SFX_SHOOT_SPREAD := preload("res://assets/audio/sfx/sfx_shoot_spread.tres")

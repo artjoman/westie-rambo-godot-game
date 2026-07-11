@@ -16,4 +16,5 @@ perk_id = "flashbang"
 shape = SubResource("RectangleShape2D_pickup")
 
 [node name="Sprite" type="Sprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
 texture = ExtResource("2")

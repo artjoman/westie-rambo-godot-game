@@ -10,6 +10,8 @@ extends Node2D
 signal level_completed
 
 const KILL_FLOOR_Y := 600.0
+const TOUCH_CONTROLS_SCENE := preload("res://scenes/ui/touch_controls.tscn")
+const PAUSE_MENU_SCENE := preload("res://scenes/ui/pause_menu.tscn")
 
 @export var camera_limit_left: float = 0.0
 @export var camera_limit_right: float = 1280.0
@@ -24,6 +26,9 @@ const KILL_FLOOR_Y := 600.0
 @onready var terrain_visual: Node2D = $TerrainVisual
 
 var _player: Node = null
+var _pause_menu: CanvasLayer = null
+var _died_this_level := false
+var _level_elapsed_sec := 0.0
 # Enemies self-register here on _ready() (see register_enemy()) so a
 # checkpoint-triggered respawn can re-instantiate whichever ones are dead —
 # queue_free() destroys the node, so this is the only surviving record of
@@ -32,14 +37,34 @@ var _enemy_records: Array[Dictionary] = []
 
 
 func _ready() -> void:
+	# Needed so _unhandled_input's pause toggle keeps firing once
+	# get_tree().paused is true — this is the level's scene root with no
+	# always-on ancestor otherwise. Gameplay nodes (player, enemies, etc.)
+	# are unaffected: they stay default PROCESS_MODE_INHERIT and freeze
+	# correctly, since only this node's own logic opts into ALWAYS.
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	_build_terrain()
 	_setup_camera()
 	_connect_boss()
 	_connect_player()
+	_setup_touch_controls()
 	MusicManager.play_level()
 
 
-func _physics_process(_delta: float) -> void:
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("pause"):
+		_toggle_pause()
+
+
+func _physics_process(delta: float) -> void:
+	# process_mode = ALWAYS above means this now also runs while paused;
+	# the kill-floor check below has no business running mid-pause.
+	if get_tree().paused:
+		return
+	# Manual delta-sum rather than a wall-clock timestamp: sitting in the
+	# pause menu must not count toward a speedrun achievement's clock, and
+	# this line only ever runs on unpaused ticks thanks to the guard above.
+	_level_elapsed_sec += delta
 	# Catch-all so falling anywhere off the bottom of the level (an
 	# unmapped gap, a missed jump into open space, etc.) always respawns
 	# the player instead of an infinite silent fall — independent of
@@ -48,6 +73,35 @@ func _physics_process(_delta: float) -> void:
 		_player = get_tree().get_first_node_in_group("player")
 	if _player and _player.global_position.y > KILL_FLOOR_Y:
 		_player.respawn()
+
+
+func _toggle_pause() -> void:
+	if _pause_menu != null and is_instance_valid(_pause_menu):
+		_close_pause_menu()
+	else:
+		_open_pause_menu()
+
+
+func _open_pause_menu() -> void:
+	get_tree().paused = true
+	_pause_menu = PAUSE_MENU_SCENE.instantiate()
+	_pause_menu.resumed.connect(_close_pause_menu)
+	add_child(_pause_menu)
+	_set_touch_controls_visible(false)
+
+
+func _close_pause_menu() -> void:
+	get_tree().paused = false
+	if _pause_menu != null and is_instance_valid(_pause_menu):
+		_pause_menu.queue_free()
+	_pause_menu = null
+	_set_touch_controls_visible(true)
+
+
+func _set_touch_controls_visible(is_visible: bool) -> void:
+	var touch := get_tree().get_first_node_in_group("touch_controls")
+	if touch:
+		touch.visible = is_visible
 
 
 func _build_terrain() -> void:
@@ -79,6 +133,14 @@ func _connect_player() -> void:
 	player.respawned.connect(_on_player_respawned)
 
 
+## On-screen joystick + action buttons for touch devices, since player.gd's
+## input is otherwise keyboard/gamepad only. No-op on desktop/headless.
+func _setup_touch_controls() -> void:
+	if not DisplayServer.is_touchscreen_available():
+		return
+	add_child(TOUCH_CONTROLS_SCENE.instantiate())
+
+
 ## Enemies call this from their own _ready() so a later checkpoint respawn
 ## can tell which ones are dead (queue_free()'d, so is_instance_valid()
 ## goes false) and re-instantiate the ones positioned past the checkpoint.
@@ -91,6 +153,7 @@ func register_enemy(enemy: Node) -> void:
 
 
 func _on_player_respawned() -> void:
+	_died_this_level = true
 	var checkpoint: Vector2 = _player.respawn_position
 	# Collect first, mutate after: revived enemies self-register a brand new
 	# record in their own _ready() (same as any other enemy), so the dead
@@ -123,6 +186,7 @@ func _on_player_respawned() -> void:
 
 
 func _on_boss_defeated() -> void:
+	AchievementManager.report_level_cleared(GameState.current_level_index, _level_elapsed_sec, _died_this_level)
 	level_completed.emit()
 	var hud := get_tree().get_first_node_in_group("hud")
 	if hud:

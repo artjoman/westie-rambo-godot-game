@@ -14,6 +14,7 @@ config/name="Rambo Westie"
 run/main_scene="res://scenes/ui/main_menu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 boot_splash/bg_color=Color(0, 0, 0, 1)
+config/icon="res://assets/icon/icon_main_192.png"
 
 [autoload]
 
@@ -22,6 +23,8 @@ SaveManager="*res://autoload/save_manager.gd"
 SceneManager="*res://autoload/scene_manager.gd"
 AudioManager="*res://autoload/audio_manager.gd"
 MusicManager="*res://autoload/music_manager.gd"
+AchievementManager="*res://autoload/achievement_manager.gd"
+CheatManager="*res://autoload/cheat_manager.gd"
 
 [display]
 
@@ -30,6 +33,7 @@ window/size/viewport_height=270
 window/size/window_width_override=1440
 window/size/window_height_override=810
 window/stretch/mode="viewport"
+window/handheld/orientation="landscape"
 
 [input]
 
@@ -100,5 +104,6 @@ use_perk={
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0
-renderer/rendering_method="mobile"
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true

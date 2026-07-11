@@ -109,16 +109,34 @@ func _build_boss_theme() -> AudioStreamWAV:
 	return _generate_track(lead, bass, beat, "square", "square", 0.32, 0.28)
 
 
+## Extra samples appended after loop_end, duplicating the start of the loop.
+## A WAV loaded from disk gets this padding added transparently by Godot's
+## importer, because the mixer's resampler reads a few samples *ahead* of
+## the current playback position for interpolation and needs real backing
+## data there even right at the loop seam. A stream built by hand via
+## `stream.data = ...` (as here) never gets that padding -- so on real
+## Android hardware, the first loop wrap (a few seconds in, matching when
+## this game was crashing on device) could read past the buffer's actual
+## end. Padding it ourselves closes that gap.
+const LOOP_GUARD_SAMPLES := 8
+
 func _generate_track(lead_notes: Array, bass_notes: Array, beat_duration: float, lead_wave: String, bass_wave: String, lead_volume: float, bass_volume: float) -> AudioStreamWAV:
 	var lead_samples := _build_voice(lead_notes, beat_duration, lead_wave, lead_volume)
 	var bass_samples := _build_voice(bass_notes, beat_duration, bass_wave, bass_volume)
 	var sample_count: int = min(lead_samples.size(), bass_samples.size())
+	var guard_count: int = min(LOOP_GUARD_SAMPLES, sample_count)
 
 	var data := PackedByteArray()
-	data.resize(sample_count * 2)
+	data.resize((sample_count + guard_count) * 2)
 	for i in sample_count:
 		var mixed: float = clamp(lead_samples[i] + bass_samples[i], -1.0, 1.0)
 		data.encode_s16(i * 2, int(mixed * 32767))
+	for i in guard_count:
+		# Duplicate the loop's opening samples right after loop_end, so
+		# post-wrap interpolation reads real (correct) data instead of
+		# running off the end of the buffer.
+		var mixed: float = clamp(lead_samples[i] + bass_samples[i], -1.0, 1.0)
+		data.encode_s16((sample_count + i) * 2, int(mixed * 32767))
 
 	var stream := AudioStreamWAV.new()
 	stream.format = AudioStreamWAV.FORMAT_16_BITS
@@ -135,9 +153,24 @@ func _generate_track(lead_notes: Array, bass_notes: Array, beat_duration: float,
 ## phase across notes (no clicking from frequency jumps) plus a short
 ## per-note envelope (so note *boundaries* don't click either).
 func _build_voice(notes: Array, beat_duration: float, wave_type: String, volume: float) -> PackedFloat32Array:
-	var samples := PackedFloat32Array()
-	var phase := 0.0
 	const ENVELOPE_TIME := 0.015
+
+	# Pre-sized and index-assigned rather than grown via repeated .append() --
+	# a real Xiaomi/MIUI device crashed reliably ~5s into boot (SIGSEGV,
+	# tag-mismatched pointer, on whichever thread next touched the heap)
+	# while this ran, appending 100k+ samples one at a time. Computing the
+	# total length up front and resizing once avoids the repeated CowData
+	# grow/copy that pattern causes.
+	var total_samples := 0
+	for note in notes:
+		var duration: float = note[1] * beat_duration
+		total_samples += int(duration * MIX_RATE)
+
+	var samples := PackedFloat32Array()
+	samples.resize(total_samples)
+
+	var phase := 0.0
+	var out_i := 0
 
 	for note in notes:
 		var freq: float = note[0]
@@ -165,6 +198,7 @@ func _build_voice(notes: Array, beat_duration: float, wave_type: String, volume:
 			elif i > note_sample_count - envelope_samples:
 				envelope = float(note_sample_count - i) / envelope_samples
 
-			samples.append(raw * volume * envelope)
+			samples[out_i] = raw * volume * envelope
+			out_i += 1
 
 	return samples

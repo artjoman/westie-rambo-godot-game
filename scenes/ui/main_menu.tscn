@@ -20,18 +20,17 @@ mode = 0
 
 [node name="VBox" type="VBoxContainer" parent="."]
 anchor_left = 0.5
-anchor_top = 0.5
 anchor_right = 0.5
-anchor_bottom = 0.5
 offset_left = -80.0
-offset_top = -60.0
+offset_top = 12.0
 offset_right = 80.0
-offset_bottom = 60.0
+offset_bottom = 152.0
+theme_override_constants/separation = 2
 alignment = 1
 
 [node name="TitleLabel" type="Label" parent="VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
 text = "RAMBO WESTIE"
 
@@ -43,8 +42,20 @@ text = "HIGH SCORE: 0"
 
 [node name="StartButton" type="Button" parent="VBox"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 11
 text = "START"
+
+[node name="SettingsButton" type="Button" parent="VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "SETTINGS"
+
+[node name="AchievementsButton" type="Button" parent="VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "ACHIEVEMENTS"
 
 [node name="QuitButton" type="Button" parent="VBox"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 11
 text = "QUIT"
