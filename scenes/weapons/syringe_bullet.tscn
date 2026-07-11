@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/generated/syringe_bullet.png" id="2"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_syringe"]
-size = Vector2(10, 8)
+size = Vector2(7, 4)
 
 [node name="SyringeBullet" type="Area2D"]
 collision_layer = 16
@@ -17,8 +17,8 @@ max_lifetime = 2.5
 shape = SubResource("RectangleShape2D_syringe")
 
 [node name="Sprite" type="Sprite2D" parent="."]
-scale = Vector2(1.5, 1.5)
+scale = Vector2(0.85, 0.85)
 texture = ExtResource("2")
 
 [node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
-rect = Rect2(-8, -8, 16, 16)
+rect = Rect2(-6, -6, 12, 12)
