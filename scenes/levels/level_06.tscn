@@ -1,0 +1,199 @@
+[gd_scene load_steps=34 format=3]
+
+[ext_resource type="Script" path="res://scenes/levels/level_06.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2"]
+[ext_resource type="Script" path="res://scenes/components/bullet_pool.gd" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/bullet.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/syringe_bullet.tscn" id="5"]
+[ext_resource type="Script" path="res://scenes/components/terrain_visual.gd" id="6"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tiles/clinic_floor_top.png" id="7"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tiles/clinic_floor_fill.png" id="8"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tiles/water.png" id="9"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tiles/hole.png" id="10"]
+[ext_resource type="Script" path="res://scenes/hazards/checkpoint.gd" id="11"]
+[ext_resource type="Script" path="res://scenes/hazards/boss_trigger.gd" id="12"]
+[ext_resource type="Script" path="res://scenes/hazards/drug_trap.gd" id="13"]
+[ext_resource type="Script" path="res://scenes/hazards/vet_worker.gd" id="14"]
+[ext_resource type="Script" path="res://scenes/hazards/capture_trigger.gd" id="15"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/soldier.tscn" id="16"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/soldier_sniper.tscn" id="17"]
+[ext_resource type="PackedScene" path="res://scenes/spawners/enemy_spawner.tscn" id="18"]
+[ext_resource type="Resource" path="res://resources/waves/wave_clinic_1.tres" id="19"]
+[ext_resource type="Resource" path="res://resources/waves/wave_clinic_2.tres" id="20"]
+[ext_resource type="PackedScene" path="res://scenes/bosses/boss_vet.tscn" id="21"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="22"]
+[ext_resource type="Texture2D" path="res://assets/sprites/generated/clinic_bg.png" id="23"]
+[ext_resource type="Texture2D" path="res://assets/sprites/generated/vet_worker.png" id="24"]
+[ext_resource type="Texture2D" path="res://assets/sprites/generated/drug_trap.png" id="25"]
+[ext_resource type="Resource" path="res://resources/waves/wave_clinic_3.tres" id="26"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
+size = Vector2(1450, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
+size = Vector2(32, 700)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_checkpoint"]
+size = Vector2(16, 40)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_boss_trigger"]
+size = Vector2(180, 60)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_drug_trap"]
+size = Vector2(24, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_capture_trigger"]
+size = Vector2(60, 70)
+
+[node name="Level06" type="Node2D"]
+script = ExtResource("1")
+camera_limit_right = 1450.0
+
+[node name="Background" type="ParallaxBackground" parent="."]
+
+[node name="ClinicLayer" type="ParallaxLayer" parent="Background"]
+motion_scale = Vector2(0.1, 0.05)
+motion_mirroring = Vector2(480, 0)
+
+[node name="ClinicWall" type="Sprite2D" parent="Background/ClinicLayer"]
+texture = ExtResource("23")
+centered = false
+
+[node name="TerrainVisual" type="Node2D" parent="."]
+script = ExtResource("6")
+grass_texture = ExtResource("7")
+dirt_texture = ExtResource("8")
+water_texture = ExtResource("9")
+hole_texture = ExtResource("10")
+dirt_depth = 4
+
+[node name="GroundStatic" type="StaticBody2D" parent="."]
+position = Vector2(725, 250)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GroundStatic"]
+shape = SubResource("RectangleShape2D_ground")
+
+[node name="LeftWall" type="StaticBody2D" parent="."]
+position = Vector2(0, 130)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall"]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="RightWall" type="StaticBody2D" parent="."]
+position = Vector2(1450, 130)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall"]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="Player" parent="." instance=ExtResource("2")]
+position = Vector2(40, 216)
+
+[node name="Projectiles" type="Node2D" parent="."]
+script = ExtResource("3")
+bullet_scene = ExtResource("4")
+
+[node name="EnemyProjectiles" type="Node2D" parent="."]
+script = ExtResource("3")
+bullet_scene = ExtResource("5")
+group_name = "enemy_bullet_pool"
+
+[node name="Soldier1" parent="." instance=ExtResource("16")]
+position = Vector2(180, 224.9252)
+
+[node name="DrugTrap1" type="Area2D" parent="."]
+position = Vector2(300, 234)
+collision_layer = 64
+collision_mask = 2
+script = ExtResource("13")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DrugTrap1"]
+shape = SubResource("RectangleShape2D_drug_trap")
+
+[node name="Sprite" type="Sprite2D" parent="DrugTrap1"]
+position = Vector2(0, -8)
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("25")
+
+[node name="Timer" type="Timer" parent="DrugTrap1"]
+
+[node name="VetWorker" type="Node2D" parent="."]
+position = Vector2(560, 214)
+z_index = -1
+script = ExtResource("14")
+
+[node name="Sprite" type="Sprite2D" parent="VetWorker"]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("24")
+
+[node name="CaptureTrigger" type="Area2D" parent="."]
+position = Vector2(520, 220)
+collision_layer = 64
+collision_mask = 2
+script = ExtResource("15")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CaptureTrigger"]
+shape = SubResource("RectangleShape2D_capture_trigger")
+
+[node name="CaptureSpawner1" parent="." instance=ExtResource("18")]
+position = Vector2(420, 224.9252)
+wave = ExtResource("19")
+auto_start = false
+
+[node name="CaptureSpawner2" parent="." instance=ExtResource("18")]
+position = Vector2(650, 224.9252)
+wave = ExtResource("20")
+auto_start = false
+
+[node name="CaptureSpawner3" parent="." instance=ExtResource("18")]
+position = Vector2(540, 224.9252)
+wave = ExtResource("26")
+auto_start = false
+
+[node name="DrugTrap2" type="Area2D" parent="."]
+position = Vector2(850, 234)
+collision_layer = 64
+collision_mask = 2
+script = ExtResource("13")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DrugTrap2"]
+shape = SubResource("RectangleShape2D_drug_trap")
+
+[node name="Sprite" type="Sprite2D" parent="DrugTrap2"]
+position = Vector2(0, -8)
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("25")
+
+[node name="Timer" type="Timer" parent="DrugTrap2"]
+
+[node name="Soldier2" parent="." instance=ExtResource("17")]
+position = Vector2(950, 224.9252)
+
+[node name="Checkpoint" type="Area2D" parent="."]
+position = Vector2(1050, 220)
+collision_layer = 64
+collision_mask = 2
+script = ExtResource("11")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Checkpoint"]
+shape = SubResource("RectangleShape2D_checkpoint")
+
+[node name="BossTrigger" type="Area2D" parent="."]
+position = Vector2(1150, 220)
+collision_layer = 64
+collision_mask = 2
+script = ExtResource("12")
+boss_path = NodePath("../BossVet")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BossTrigger"]
+shape = SubResource("RectangleShape2D_boss_trigger")
+
+[node name="BossVet" parent="." instance=ExtResource("21")]
+position = Vector2(1300, 234)
+
+[node name="HUD" parent="." instance=ExtResource("22")]

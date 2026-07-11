@@ -34,6 +34,7 @@ func _ready() -> void:
 	await _check_touch_controls()
 	await _check_cheat_konami()
 	_check_save_manager()
+	await _check_level_06()
 	await _check_cheat_level_select() # must stay last -- see header comment
 	_print_summary()
 	# Not self.get_tree(): the level-select check above triggers a real
@@ -52,6 +53,7 @@ func _check_scene_boot() -> void:
 		"res://scenes/levels/level_03.tscn",
 		"res://scenes/levels/level_04.tscn",
 		"res://scenes/levels/level_05.tscn",
+		"res://scenes/levels/level_06.tscn",
 	]:
 		var packed: PackedScene = load(path)
 		var ok := packed != null
@@ -203,6 +205,81 @@ func _check_save_manager() -> void:
 	_check("save_volume applies immediately",
 		AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Music")) == -4.0)
 	SaveManager.save_volume(music_before, SaveManager.sfx_volume_db)
+
+
+func _check_level_06() -> void:
+	print("--- level 6: capture encounter + dizzy ---")
+	var inst: Node = load("res://scenes/levels/level_06.tscn").instantiate()
+	get_tree().root.add_child.call_deferred(inst)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	await get_tree().process_frame
+
+	var player: CharacterBody2D = get_tree().get_first_node_in_group("player")
+	_check("level 6: player has set_dizzy/set_captured",
+		player.has_method("set_dizzy") and player.has_method("set_captured"))
+
+	player.set_dizzy(true)
+	_check("level 6: set_dizzy(true) sets dizzy", player.dizzy)
+	player.set_dizzy(false)
+	_check("level 6: set_dizzy(false) clears dizzy", not player.dizzy)
+
+	# Track spawned wave enemies the same way level_06.gd does -- there's no
+	# generic "enemy" group in this codebase to query instead.
+	var spawned_enemies: Array = []
+	var spawner_count: int = inst.capture_wave_spawners.size()
+	for spawner in inst.capture_wave_spawners:
+		spawner.spawned.connect(func(e): spawned_enemies.append(e))
+
+	var capture_trigger := inst.get_node("CaptureTrigger")
+	capture_trigger.triggered.emit()
+	await get_tree().process_frame
+	_check("level 6: capture trigger locks player.is_captured", player.is_captured)
+
+	Input.action_press("move_right")
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_check("level 6: captured player can't move horizontally",
+		is_equal_approx(player.velocity.x, 0.0), "velocity.x=%s" % player.velocity.x)
+	# Regression guard: player.gd's _handle_horizontal_movement used to
+	# `return` before ever touching `facing` while captured, so the player
+	# could aim up/down but never turn to face the other direction. Confirm
+	# turning while pinned actually works now.
+	_check("level 6: captured player can still turn to face right", player.facing == 1)
+	Input.action_release("move_right")
+	Input.action_press("move_left")
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_check("level 6: captured player can still turn to face left", player.facing == -1)
+	Input.action_release("move_left")
+
+	# Drive through every sequential wave: wait for the current wave to
+	# finish spawning, kill everything it spawned, then confirm the next
+	# wave (or, on the last one, the actual capture release) follows.
+	for wave_num in range(spawner_count):
+		var waited := 0.0
+		while inst._current_wave_index == wave_num and inst._wave_spawned_this_wave < inst._wave_total_this_wave and waited < 10.0:
+			await get_tree().create_timer(0.3).timeout
+			waited += 0.3
+		_check("level 6: wave %d finishes spawning" % (wave_num + 1),
+			inst._current_wave_index == wave_num and inst._wave_total_this_wave > 0,
+			"current_wave_index=%d spawned=%d/%d" % [inst._current_wave_index, inst._wave_spawned_this_wave, inst._wave_total_this_wave])
+
+		for e in spawned_enemies:
+			if is_instance_valid(e) and e.has_node("HealthComponent"):
+				e.get_node("HealthComponent").damage(999)
+		spawned_enemies.clear()
+		await get_tree().create_timer(0.5).timeout
+
+		if wave_num < spawner_count - 1:
+			_check("level 6: wave %d clear advances to wave %d" % [wave_num + 1, wave_num + 2],
+				inst._current_wave_index == wave_num + 1)
+
+	_check("level 6: clearing every wave releases capture", not inst._capture_active)
+	_check("level 6: player.is_captured cleared on release", not player.is_captured)
+
+	inst.queue_free()
+	await get_tree().process_frame
 
 
 func _check_cheat_level_select() -> void:

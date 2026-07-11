@@ -24,6 +24,7 @@ const WATER_SWIM_VELOCITY := -160.0
 # before the lighter gravity has a chance to feel slow.
 const WATER_ENTRY_SPLASH_CAP := 80.0
 const WATER_TINT := Color(0.55, 0.75, 1.0)
+const DIZZY_TINT := Color(1.0, 0.65, 1.0)
 
 const LASER_PULSE_SPEED := 20.0
 const LASER_WIDTH_BASE := 2.0
@@ -95,6 +96,8 @@ var weapon_levels: Dictionary = {}
 var current_weapon_id := "pistol"
 var current_weapon: WeaponData
 var in_water := false
+var dizzy := false
+var is_captured := false
 var has_jetpack := false
 var jetpack_fuel := 0.0
 var has_shield := false
@@ -191,6 +194,22 @@ func _handle_jump() -> void:
 
 func _handle_horizontal_movement(delta: float) -> void:
 	var direction := Input.get_axis("move_left", "move_right")
+	if dizzy:
+		direction = -direction # reversed controls read as disoriented, but stay fully playable
+
+	# Captured (see set_captured()): pinned in place for a wave-defense
+	# encounter -- position never moves, but left/right input must still
+	# flip facing (and therefore aim_direction, via _update_aim_direction())
+	# so the player can turn to face enemies closing in from either side.
+	# _handle_jump()/_handle_shooting() are untouched, so jumping on the
+	# spot and firing in any direction also still work normally.
+	if is_captured:
+		if direction != 0.0:
+			facing = 1 if direction > 0.0 else -1
+			visual.scale.x = facing
+		velocity.x = move_toward(velocity.x, 0.0, SPEED * speed_multiplier)
+		return
+
 	var speed := SPEED * speed_multiplier
 	if direction != 0.0:
 		velocity.x = move_toward(velocity.x, direction * speed, ACCEL * delta)
@@ -209,8 +228,34 @@ func set_in_water(value: bool) -> void:
 		velocity.y = min(velocity.y, WATER_ENTRY_SPLASH_CAP)
 		visual.modulate = WATER_TINT
 	elif not value and in_water:
-		visual.modulate = Color(1.0, 1.0, 1.0)
+		visual.modulate = _base_tint()
 	in_water = value
+
+
+## Drug-trap hazard (see scenes/hazards/drug_trap.gd): reverses left/right
+## input and tints the sprite for a fixed duration owned by the trap itself,
+## rather than clearing the instant the player leaves the trap zone -- a
+## quick brush-through should still fully disorient.
+func set_dizzy(value: bool) -> void:
+	dizzy = value
+	visual.modulate = DIZZY_TINT if value else _base_tint()
+
+
+## Vet-worker capture (see scenes/hazards/capture_trigger.gd): pins the
+## player in place for a wave-defense encounter. Only horizontal movement is
+## disabled -- jump and aim/shoot are untouched.
+func set_captured(value: bool) -> void:
+	is_captured = value
+	if value:
+		velocity.x = 0.0
+
+
+func _base_tint() -> Color:
+	if dizzy:
+		return DIZZY_TINT
+	if in_water:
+		return WATER_TINT
+	return Color(1.0, 1.0, 1.0)
 
 
 func pickup_weapon(weapon_id: String) -> void:
@@ -297,9 +342,8 @@ func _on_hurt(amount: int) -> void:
 
 func _flash_hit() -> void:
 	visual.modulate = Color(3.0, 3.0, 3.0)
-	var base_color := WATER_TINT if in_water else Color(1.0, 1.0, 1.0)
 	var tween := create_tween()
-	tween.tween_property(visual, "modulate", base_color, 0.15)
+	tween.tween_property(visual, "modulate", _base_tint(), 0.15)
 
 
 func _on_died() -> void:
