@@ -15,6 +15,12 @@ enum State { IDLE, CHASE }
 @export var contact_damage: int = 1
 @export var score_value: int = 100
 
+# Gentle rotation wiggle (independent of the X-scale facing flip below)
+# reads as a tail/fin sway -- rotation rather than a Y-scale pulse since a
+# fish's motion is a side-to-side undulation, not a wing flap.
+const FIN_WIGGLE_SPEED := 6.0
+const FIN_WIGGLE_AMPLITUDE := 0.12
+
 @onready var visual: Node2D = $Visual
 @onready var health_component: Node = $HealthComponent
 @onready var hurtbox: Area2D = $Hurtbox
@@ -37,6 +43,7 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	_time += delta
+	visual.rotation = sin(_time * FIN_WIGGLE_SPEED) * FIN_WIGGLE_AMPLITUDE
 	var player := _get_player()
 	if player and global_position.distance_to(player.global_position) <= aggro_range:
 		state = State.CHASE

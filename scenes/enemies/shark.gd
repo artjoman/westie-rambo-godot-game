@@ -19,11 +19,18 @@ enum State { PATROL, CHARGE }
 @onready var hurtbox: Area2D = $Hurtbox
 @onready var contact_hitbox: Area2D = $ContactHitbox
 
+# Gentle rotation wiggle (independent of the X-scale facing flip elsewhere
+# in this file) reads as a tail sway, same technique as piranha.gd but
+# slower/wider given the shark's bigger size.
+const TAIL_SWAY_SPEED := 4.0
+const TAIL_SWAY_AMPLITUDE := 0.09
+
 var state := State.PATROL
 var facing := 1
 var _spawn_x := 0.0
 var _base_y := 0.0
 var _player: Node2D = null
+var _time := 0.0
 
 
 func _ready() -> void:
@@ -37,6 +44,8 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_time += delta
+	visual.rotation = sin(_time * TAIL_SWAY_SPEED) * TAIL_SWAY_AMPLITUDE
 	var player := _get_player()
 	if player and global_position.distance_to(player.global_position) <= aggro_range:
 		state = State.CHARGE

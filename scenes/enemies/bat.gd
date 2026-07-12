@@ -18,6 +18,13 @@ enum State { HOVER, DIVE, RETURN }
 @export var contact_damage: int = 1
 @export var score_value: int = 180
 
+# Y-scale pulse (independent of the X-scale facing flip below) sells a bat's
+# fast wing beat cheaply, without sprite-sheet frames -- runs continuously
+# regardless of state (HOVER/DIVE/RETURN) so it never looks like the wings
+# just stop.
+const WING_FLAP_SPEED := 14.0
+const WING_FLAP_AMPLITUDE := 0.22
+
 @onready var visual: Node2D = $Visual
 @onready var health_component: Node = $HealthComponent
 @onready var hurtbox: Area2D = $Hurtbox
@@ -54,6 +61,7 @@ func _register_with_level() -> void:
 
 func _physics_process(delta: float) -> void:
 	_time += delta
+	visual.scale.y = 1.0 + sin(_time * WING_FLAP_SPEED) * WING_FLAP_AMPLITUDE
 	match state:
 		State.HOVER:
 			_do_hover(delta)

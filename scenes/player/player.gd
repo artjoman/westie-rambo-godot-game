@@ -440,6 +440,10 @@ func _handle_shooting(delta: float) -> void:
 	_fire_bullet_spread(pool)
 	FxSpawner.spawn_muzzle_flash(get_tree(), muzzle.global_position, aim_direction)
 	AudioManager.play(AudioManager.SFX_SHOOT_SPREAD if current_weapon.weapon_id == "spread" else AudioManager.SFX_SHOOT)
+	# Small enough to read as recoil rather than getting hit -- shake_amount
+	# is a max(), not additive, so rapid-fire weapons hold at this level
+	# instead of escalating shot over shot.
+	shake_camera(0.6)
 	fire_cooldown = 1.0 / current_weapon.fire_rate
 
 

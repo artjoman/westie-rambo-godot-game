@@ -15,9 +15,17 @@ extends CharacterBody2D
 @onready var hurtbox: Area2D = $Hurtbox
 @onready var fire_timer: Timer = $FireTimer
 
+## A flat-gliding sprite with zero visual variation reads as a rigid
+## cardboard cutout being dragged sideways rather than a bird in flight — a
+## fast Y-scale pulse on Visual (independent of the X-scale facing flip
+## below) sells a wing flap cheaply, without needing sprite-sheet frames.
+const WING_FLAP_SPEED := 9.0
+const WING_FLAP_AMPLITUDE := 0.18
+
 var facing := 1
 var _spawn_x := 0.0
 var _poop_pool: Node = null
+var _time := 0.0
 
 
 func _ready() -> void:
@@ -39,6 +47,9 @@ func _register_with_level() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_time += delta
+	visual.scale.y = 1.0 + sin(_time * WING_FLAP_SPEED) * WING_FLAP_AMPLITUDE
+
 	global_position.x += facing * patrol_speed * delta
 	# Same boundary-flip fix as soldier.gd/bat.gd.
 	var offset := global_position.x - _spawn_x

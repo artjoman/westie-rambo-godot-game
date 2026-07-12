@@ -14,11 +14,22 @@ signal defeated
 
 @onready var health_component: Node = $HealthComponent
 @onready var hurtbox: Area2D = $Hurtbox
-@onready var visual: CanvasItem = $Visual
+@onready var visual: Node2D = $Visual
+
+# Every boss used to be a fully rigid sprite apart from the hit-flash below —
+# a slow idle bob sells "alive and posturing" instead of "cardboard cutout"
+# without needing per-boss sprite-sheet art. Lives in _process() rather than
+# _physics_process() deliberately: boss_chaser.gd/boss_splitter.gd already
+# override _physics_process() for their own movement without calling
+# super(), which would silently swallow this if it lived there instead.
+const IDLE_BOB_SPEED := 2.2
+const IDLE_BOB_AMPLITUDE := 2.0
 
 var phase := 0
 var _player: Node2D = null
 var _bullet_pool: Node = null
+var _idle_time := 0.0
+var _visual_base_y := 0.0
 
 
 func _ready() -> void:
@@ -28,7 +39,13 @@ func _ready() -> void:
 	hurtbox.hurt.connect(health_component.damage)
 	health_component.health_changed.connect(_on_health_changed)
 	health_component.died.connect(_on_died)
+	_visual_base_y = visual.position.y
 	_on_ready_extra()
+
+
+func _process(delta: float) -> void:
+	_idle_time += delta
+	visual.position.y = _visual_base_y + sin(_idle_time * IDLE_BOB_SPEED) * IDLE_BOB_AMPLITUDE
 
 
 func _on_ready_extra() -> void:
