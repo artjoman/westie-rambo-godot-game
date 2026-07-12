@@ -35,6 +35,7 @@ func _ready() -> void:
 	await _check_cheat_konami()
 	_check_save_manager()
 	await _check_level_06()
+	await _check_level_07()
 	await _check_cheat_level_select() # must stay last -- see header comment
 	_print_summary()
 	# Not self.get_tree(): the level-select check above triggers a real
@@ -54,6 +55,7 @@ func _check_scene_boot() -> void:
 		"res://scenes/levels/level_04.tscn",
 		"res://scenes/levels/level_05.tscn",
 		"res://scenes/levels/level_06.tscn",
+		"res://scenes/levels/level_07.tscn",
 	]:
 		var packed: PackedScene = load(path)
 		var ok := packed != null
@@ -277,6 +279,50 @@ func _check_level_06() -> void:
 
 	_check("level 6: clearing every wave releases capture", not inst._capture_active)
 	_check("level 6: player.is_captured cleared on release", not player.is_captured)
+
+	inst.queue_free()
+	await get_tree().process_frame
+
+
+func _check_level_07() -> void:
+	print("--- level 7: slippery floor + wind push ---")
+	var inst: Node = load("res://scenes/levels/level_07.tscn").instantiate()
+	get_tree().root.add_child.call_deferred(inst)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	await get_tree().process_frame
+
+	var player: CharacterBody2D = get_tree().get_first_node_in_group("player")
+	_check("level 7: player has set_on_slippery/set_wind_push",
+		player.has_method("set_on_slippery") and player.has_method("set_wind_push"))
+
+	# Driving _physics_process() directly gives deterministic frame-by-frame
+	# control instead of waiting on real time, matching how this was proven
+	# out manually before writing the permanent check.
+	player.global_position = Vector2(315, 216)
+	player.velocity = Vector2.ZERO
+	player.set_on_slippery(true)
+	Input.action_press("move_right")
+	for i in 5:
+		player._physics_process(1.0 / 60.0)
+	var slippery_v: float = player.velocity.x
+	_check("level 7: slippery floor builds speed slower than solid ground",
+		slippery_v > 0.0 and slippery_v < 30.0, "velocity.x after 5 frames=%s" % slippery_v)
+
+	Input.action_release("move_right")
+	player._physics_process(1.0 / 60.0)
+	_check("level 7: releasing input on suds doesn't instantly stop (momentum carries)",
+		player.velocity.x > slippery_v * 0.5,
+		"velocity.x=%s (was %s before release)" % [player.velocity.x, slippery_v])
+	player.set_on_slippery(false)
+	player.velocity = Vector2.ZERO
+
+	player.set_wind_push(-100.0)
+	for i in 10:
+		player._physics_process(1.0 / 60.0)
+	_check("level 7: wind push moves the player with no input held",
+		player.velocity.x < -50.0, "velocity.x=%s" % player.velocity.x)
+	player.set_wind_push(0.0)
 
 	inst.queue_free()
 	await get_tree().process_frame

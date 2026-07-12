@@ -26,6 +26,12 @@ const WATER_ENTRY_SPLASH_CAP := 80.0
 const WATER_TINT := Color(0.55, 0.75, 1.0)
 const DIZZY_TINT := Color(1.0, 0.65, 1.0)
 
+# Soap-suds floor (see set_on_slippery()): much lower accel/decel than solid
+# ground, so input takes longer to build up speed and momentum keeps
+# carrying the player after release instead of the normal instant stop.
+const SLIPPERY_ACCEL := 150.0
+const SLIPPERY_DECEL := 90.0
+
 const LASER_PULSE_SPEED := 20.0
 const LASER_WIDTH_BASE := 2.0
 const LASER_WIDTH_AMPLITUDE := 0.8
@@ -98,6 +104,8 @@ var current_weapon: WeaponData
 var in_water := false
 var dizzy := false
 var is_captured := false
+var on_slippery := false
+var wind_push := 0.0 # signed target velocity contribution while inside a gust zone
 var has_jetpack := false
 var jetpack_fuel := 0.0
 var has_shield := false
@@ -211,16 +219,41 @@ func _handle_horizontal_movement(delta: float) -> void:
 		return
 
 	var speed := SPEED * speed_multiplier
-	if direction != 0.0:
-		velocity.x = move_toward(velocity.x, direction * speed, ACCEL * delta)
-		facing = 1 if direction > 0.0 else -1
-		visual.scale.x = facing
+	var accel := SLIPPERY_ACCEL if on_slippery else ACCEL
+	# wind_push (see set_wind_push()) folds into the target velocity itself
+	# rather than being a one-off nudge, so a gust keeps steadily pushing
+	# every frame it's active -- held input can fight it (partially or
+	# fully cancel it, depending on relative strength) rather than being
+	# powerless against it, but doing nothing lets it carry the player.
+	var target := direction * speed + wind_push
+	if direction != 0.0 or wind_push != 0.0:
+		velocity.x = move_toward(velocity.x, target, accel * delta)
+		if direction != 0.0:
+			facing = 1 if direction > 0.0 else -1
+			visual.scale.x = facing
+	elif on_slippery:
+		velocity.x = move_toward(velocity.x, 0.0, SLIPPERY_DECEL * delta)
 	else:
 		velocity.x = move_toward(velocity.x, 0.0, speed)
 
 
 func set_speed_multiplier(multiplier: float) -> void:
 	speed_multiplier = multiplier
+
+
+## Soap-suds floor (see scenes/hazards/soap_suds_zone.gd): only active while
+## standing in the zone, unlike set_dizzy()'s own fixed duration -- suds
+## don't cling to you the way a drug dose does, so it clears the instant you
+## step off, matching set_speed_multiplier()/set_in_water()'s shape instead.
+func set_on_slippery(value: bool) -> void:
+	on_slippery = value
+
+
+## Blow-dryer gust (see scenes/hazards/blow_dryer_gust.gd): a continuous
+## signed push added to the horizontal target velocity every frame while
+## inside an active gust. 0.0 means no wind.
+func set_wind_push(value: float) -> void:
+	wind_push = value
 
 
 func set_in_water(value: bool) -> void:

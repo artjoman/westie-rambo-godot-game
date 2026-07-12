@@ -1,0 +1,197 @@
+[gd_scene load_steps=27 format=3]
+
+[ext_resource type="Script" path="res://scenes/levels/level_07.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2"]
+[ext_resource type="Script" path="res://scenes/components/bullet_pool.gd" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/bullet.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/air_puff_bullet.tscn" id="5"]
+[ext_resource type="Script" path="res://scenes/components/terrain_visual.gd" id="6"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tiles/salon_floor_top.png" id="7"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tiles/salon_floor_fill.png" id="8"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tiles/water.png" id="9"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tiles/hole.png" id="10"]
+[ext_resource type="Script" path="res://scenes/hazards/death_pit.gd" id="11"]
+[ext_resource type="Script" path="res://scenes/hazards/checkpoint.gd" id="12"]
+[ext_resource type="Script" path="res://scenes/hazards/boss_trigger.gd" id="13"]
+[ext_resource type="Script" path="res://scenes/hazards/soap_suds_zone.gd" id="14"]
+[ext_resource type="Script" path="res://scenes/hazards/blow_dryer_gust.gd" id="15"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/soldier.tscn" id="16"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/soldier_scout.tscn" id="17"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/soldier_brute.tscn" id="18"]
+[ext_resource type="PackedScene" path="res://scenes/bosses/boss_groomer.tscn" id="19"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="20"]
+[ext_resource type="Texture2D" path="res://assets/sprites/generated/salon_bg.png" id="21"]
+[ext_resource type="Texture2D" path="res://assets/sprites/generated/blow_dryer.png" id="22"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground_left"]
+size = Vector2(380, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground_right"]
+size = Vector2(980, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
+size = Vector2(32, 700)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pit"]
+size = Vector2(50, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_checkpoint"]
+size = Vector2(16, 40)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_boss_trigger"]
+size = Vector2(180, 60)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_suds"]
+size = Vector2(130, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_suds_small"]
+size = Vector2(110, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gust"]
+size = Vector2(80, 48)
+
+[node name="Level07" type="Node2D"]
+script = ExtResource("1")
+camera_limit_right = 1400.0
+
+[node name="Background" type="ParallaxBackground" parent="."]
+
+[node name="SalonLayer" type="ParallaxLayer" parent="Background"]
+motion_scale = Vector2(0.1, 0.05)
+motion_mirroring = Vector2(480, 0)
+
+[node name="SalonWall" type="Sprite2D" parent="Background/SalonLayer"]
+texture = ExtResource("21")
+centered = false
+
+[node name="TerrainVisual" type="Node2D" parent="."]
+script = ExtResource("6")
+grass_texture = ExtResource("7")
+dirt_texture = ExtResource("8")
+water_texture = ExtResource("9")
+hole_texture = ExtResource("10")
+dirt_depth = 4
+
+[node name="GroundLeft" type="StaticBody2D" parent="."]
+position = Vector2(190, 250)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GroundLeft"]
+shape = SubResource("RectangleShape2D_ground_left")
+
+[node name="GroundRight" type="StaticBody2D" parent="."]
+position = Vector2(910, 250)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GroundRight"]
+shape = SubResource("RectangleShape2D_ground_right")
+
+[node name="LeftWall" type="StaticBody2D" parent="."]
+position = Vector2(0, 130)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall"]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="RightWall" type="StaticBody2D" parent="."]
+position = Vector2(1400, 130)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall"]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="DeathPit1" type="Area2D" parent="."]
+position = Vector2(400, 270)
+collision_layer = 64
+collision_mask = 2
+script = ExtResource("11")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DeathPit1"]
+shape = SubResource("RectangleShape2D_pit")
+
+[node name="Player" parent="." instance=ExtResource("2")]
+position = Vector2(40, 216)
+
+[node name="Projectiles" type="Node2D" parent="."]
+script = ExtResource("3")
+bullet_scene = ExtResource("4")
+
+[node name="EnemyProjectiles" type="Node2D" parent="."]
+script = ExtResource("3")
+bullet_scene = ExtResource("5")
+group_name = "enemy_bullet_pool"
+
+[node name="SoapSudsZone1" type="Area2D" parent="."]
+position = Vector2(315, 220)
+collision_layer = 64
+collision_mask = 2
+script = ExtResource("14")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SoapSudsZone1"]
+shape = SubResource("RectangleShape2D_suds")
+
+[node name="Soldier1" parent="." instance=ExtResource("16")]
+position = Vector2(500, 224.9252)
+
+[node name="SoapSudsZone2" type="Area2D" parent="."]
+position = Vector2(705, 220)
+collision_layer = 64
+collision_mask = 2
+script = ExtResource("14")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SoapSudsZone2"]
+shape = SubResource("RectangleShape2D_suds_small")
+
+[node name="BlowDryerGust1" type="Area2D" parent="."]
+position = Vector2(780, 220)
+collision_layer = 64
+collision_mask = 2
+script = ExtResource("15")
+push_force = 100.0
+gust_direction = -1.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BlowDryerGust1"]
+shape = SubResource("RectangleShape2D_gust")
+
+[node name="Sprite" type="Sprite2D" parent="BlowDryerGust1"]
+position = Vector2(30, -10)
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("22")
+
+[node name="Timer" type="Timer" parent="BlowDryerGust1"]
+
+[node name="ScoutCat1" parent="." instance=ExtResource("17")]
+position = Vector2(900, 224.9252)
+patrol_distance = 20.0
+
+[node name="BruteCat1" parent="." instance=ExtResource("18")]
+position = Vector2(1000, 224.9252)
+patrol_distance = 20.0
+
+[node name="Checkpoint" type="Area2D" parent="."]
+position = Vector2(1080, 220)
+collision_layer = 64
+collision_mask = 2
+script = ExtResource("12")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Checkpoint"]
+shape = SubResource("RectangleShape2D_checkpoint")
+
+[node name="BossTrigger" type="Area2D" parent="."]
+position = Vector2(1180, 220)
+collision_layer = 64
+collision_mask = 2
+script = ExtResource("13")
+boss_path = NodePath("../BossGroomer")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BossTrigger"]
+shape = SubResource("RectangleShape2D_boss_trigger")
+
+[node name="BossGroomer" parent="." instance=ExtResource("19")]
+position = Vector2(1300, 234)
+
+[node name="HUD" parent="." instance=ExtResource("20")]
